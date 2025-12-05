@@ -1,217 +1,297 @@
-const perfDebugButton  = document.getElementById('perfDebugButton');
-  const perfPanel        = document.getElementById('perfPanel');
-  const perfPanelClose   = document.getElementById('perfPanelClose');
-  const runReflowBtn     = document.getElementById('runReflowBtn');
-  const reflowOutput     = document.getElementById('reflowOutput');
-  const runPaintBtn      = document.getElementById('runPaintBtn');
-  const paintOutput      = document.getElementById('paintOutput');
-  const scrollModeSelect = document.getElementById('scrollModeSelect');
-  const scrollModeStats  = document.getElementById('scrollModeStats');
+:root{
+  --bg:#0f1f20;
+  --card:#193939;
+  --accent:#0d5b70;
+  --text:#e6eef8;
+  --muted:#82a0a0b8;
+  --card-pad:16px;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
 
-  function togglePerfPanel(forceOpen) {
-    if (!perfPanel) return;
-    const isVisible = perfPanel.classList.contains('perf-panel--visible');
-    const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !isVisible;
+*{
+  box-sizing:border-box
+}
+html,body{
+  height:100%
+}
+body{
+  margin:0;
+  background: linear-gradient(180deg,#071226 0%, #0b1724 100%);
+  color:var(--text);
+  padding:20px;
+  -webkit-font-smoothing:antialiased;
+}
 
-    if (shouldOpen) {
-      perfPanel.classList.add('perf-panel--visible');
-      perfPanel.classList.remove('perf-panel--hidden');
-      perfPanel.setAttribute('aria-hidden', 'false');
-    } else {
-      perfPanel.classList.remove('perf-panel--visible');
-      perfPanel.classList.add('perf-panel--hidden');
-      perfPanel.setAttribute('aria-hidden', 'true');
-    }
-  }
+header{
+  margin-bottom:18px
+}
+h1{
+  margin:0;
+  font-size :32px;
+}
+.muted{
+  color:var(--muted);
+  margin-top:6px;
+  font-size:13px
+}
 
-  if (perfDebugButton) {
-    perfDebugButton.addEventListener('click', () => togglePerfPanel());
-  }
-  if (perfPanelClose) {
-    perfPanelClose.addEventListener('click', () => togglePerfPanel(false));
-  }
+main{
+  display:grid;
+  grid-template-columns:360px 1fr;
+  gap:18px;
+  align-items:start
+}
+@media(max-width:900px){
+  main{grid-template-columns:1fr}
+}
 
-  
-  window.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
-      e.preventDefault();
-      togglePerfPanel();
-    }
-  });
+.card{
+  background:rgba(255,255,255,0.03);
+  border-radius:10px;
+  padding:var(--card-pad);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+}
 
-  // Forced Reflow Detector 
-  function runForcedReflowScan() {
-    if (!testContent) {
-      reflowOutput.textContent = 'No local test grid available.';
-      return;
-    }
-    const tiles = testContent.querySelectorAll('.tile');
-    if (!tiles.length) {
-      reflowOutput.textContent = 'No tiles to scan.';
-      return;
-    }
+.controls label, .controls input, .controls select{
+  display:block;
+  margin-bottom:8px
+}
+.controls input, .controls select{
+  width:100%;
+  padding:8px;
+  border-radius:6px;
+  border:1px solid rgba(255,255,255,0.04);
+  background:transparent;
+  color:var(--text)
+}
 
-    const t0 = performance.now();
-    let totalHeight = 0;
-    tiles.forEach(tile => {
-      totalHeight += tile.offsetHeight;
-    });
-    const t1 = performance.now();
+.buttons{
+  display:flex;
+  gap:8px;
+  margin-top:8px
+}
+.buttons button{
+  padding:8px 12px;
+  border-radius:8px;
+  border:0;
+  background:var(--bg);
+  color:#192c2f;
+  cursor:pointer;
+  background-color:var(--accent);
+}
+.buttons button[disabled]{
+  opacity:0.45;
+  cursor:not-allowed
+}
 
-    const total = (t1 - t0);
-    const perTile = total / tiles.length;
-    const severity =
-      total > 32 ? 'HIGH (expensive layout)' :
-      total > 16 ? 'MEDIUM' :
-      'OK';
+.visuals .charts{
+  width:100%;
+  max-width:100%;
+  margin-bottom:10px
+}
+.metrics{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+  color:rgb(242, 248, 248);
+  font-size:14px
+}
 
-    reflowOutput.textContent =
-      `${total.toFixed(2)}ms total, ` + `${perTile.toFixed(3)}ms/tile → ${severity}. ` + `(sum height: ${totalHeight})`;
-  }
+.report pre{
+  background:rgba(0,0,0,0.15);
+  padding:12px;
+  border-radius:8px;
+  color:var(--muted);
+  white-space:pre-wrap
+}
 
-  if (runReflowBtn && reflowOutput) {
-    runReflowBtn.addEventListener('click', runForcedReflowScan);
-  }
+.testcontent{
+  height:380px;
+  overflow:auto;
+  border-radius:8px;
+  border:1px dashed rgba(255,255,255,0.03);
+  padding:12px;
+  margin-top:8px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)
+}
+.big-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:10px
+}
+.tile{
+  height:160px;
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  padding:10px;
+  color:var(--muted);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between
+}
+.tile h3{
+  margin:0;
+  font-size:14px;
+  color:var(--text)
+}
+.hidden{
+  display:none
+}
 
-  // Paint Cost Estimator 
-  function runPaintCostEstimate() {
-    if (!testContent) {
-      paintOutput.textContent = 'No local test grid available.';
-      return;
-    }
-    const tiles = testContent.querySelectorAll('.tile');
-    if (!tiles.length) {
-      paintOutput.textContent = 'No tiles to test.';
-      return;
-    }
+footer{
+  margin-top:16px;
+  color:var(--muted);
+  font-size:13px
+}
 
+.perf-debug-button{
+  position:fixed;
+  bottom:18px;
+  right:18px;
+  width:40px;
+  height:40px;
+  border-radius:999px;
+  border:none;
+  background:rgba(15,23,42,0.95);
+  box-shadow:0 12px 30px rgba(15,23,42,0.85);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:20px;
+  color:var(--accent);
+  z-index:9999;
+  transition:transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
+}
 
-    const t0 = performance.now();
-    tiles.forEach(tile => tile.classList.add('paint-test'));
-    void testContent.offsetHeight; 
-    const t1 = performance.now();
+.perf-debug-button:hover{
+  transform:translateY(-1px) scale(1.03);
+  box-shadow:0 16px 40px rgba(15,23,42,0.9);
+  background:rgb(24, 84, 83);
+}
 
-    
-    tiles.forEach(tile => tile.classList.remove('paint-test'));
-    void testContent.offsetHeight;
-    const t2 = performance.now();
+.perf-debug-button:active{
+  transform:translateY(0) scale(0.98);
+}
 
-    const addCost = t1 - t0;
-    const removeCost = t2 - t1;
-    const avgCost = (addCost + removeCost) / 2;
+/* Side panel */
+.perf-panel{
+  position:fixed;
+  top:0;
+  right:0;
+  width:320px;
+  max-width:90vw;
+  height:100vh;
+  background:rgba(15,23,42,0.98);
+  border-left:1px solid rgba(148,163,184,0.2);
+  box-shadow:-18px 0 40px rgba(15,23,42,0.9);
+  padding:16px;
+  box-sizing:border-box;
+  z-index:9998;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  transform:translateX(100%);
+  opacity:0;
+  pointer-events:none;
+  transition:transform 0.22s ease-out, opacity 0.18s ease-out;
+}
 
-    const severity =
-      avgCost > 32 ? 'VERY HIGH' :
-      avgCost > 16 ? 'HIGH' :
-      avgCost > 8  ? 'MEDIUM' :
-      'LOW';
+.perf-panel--visible{
+  transform:translateX(0);
+  opacity:1;
+  pointer-events:auto;
+}
 
-    paintOutput.textContent =
-      `avg ~${avgCost.toFixed(2)}ms per toggle ` +
-      `(add: ${addCost.toFixed(2)}ms, remove: ${removeCost.toFixed(2)}ms) → ${severity}`;
-  }
+.perf-panel_header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  border-bottom:1px solid rgba(148,163,184,0.25);
+  padding-bottom:8px;
+}
 
-  if (runPaintBtn && paintOutput) {
-    runPaintBtn.addEventListener('click', runPaintCostEstimate);
-  }
+.perf-panel_header h2{
+  margin:0;
+  font-size:17px;
+}
 
-  // What-if Throttle/Debounce Modes
+.perf-panel_subtitle{
+  margin:0;
+  font-size:11px;
+  color:var(--muted);
+}
 
-  function throttle(fn, wait) {
-    let last = 0;
-    let timer = null;
-    return function (...args) {
-      const now = performance.now();
-      if (now - last >= wait) {
-        last = now;
-        fn.apply(this, args);
-      } else if (!timer) {
-        const remaining = wait - (now - last);
-        timer = setTimeout(() => {
-          last = performance.now();
-          timer = null;
-          fn.apply(this, args);
-        }, remaining);
-      }
-    };
-  }
+.perf-panel_close{
+  border:none;
+  background:transparent;
+  color:var(--muted);
+  font-size:22px;
+  cursor:pointer;
+  line-height:1;
+}
 
-  function debounce(fn, wait) {
-    let timer;
-    return function (...args) {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn.apply(this, args), wait);
-    };
-  }
+.perf-panel_section{
+  padding:10px 0;
+  border-bottom:1px solid rgba(148,163,184,0.16);
+  font-size:13px;
+}
 
-  let scrollRawCount = 0;
-  let scrollHandledCount = 0;
-  let scrollListener = null;
-  let statsIntervalId = null;
+.perf-panel_section:last-of-type{
+  border-bottom:none;
+}
 
-  function baseScrollHandler(e) {
-    scrollHandledCount++;
-    if (testContentWrapper) {
-      const st = testContentWrapper.scrollTop;
-      void st;
-    }
-  }
+.perf-panel_section h3{
+  margin:0 0 6px;
+  font-size:14px;
+}
 
-  function applyScrollMode(mode) {
-    if (!testContentWrapper) {
-      if (scrollModeStats) scrollModeStats.textContent = 'No local scroll container available.';
-      return;
-    }
+.perf-panel_help{
+  margin:0 0 8px;
+  color:var(--muted);
+  font-size:12px;
+}
 
-    
-    if (scrollListener) {
-      testContentWrapper.removeEventListener('scroll', scrollListener);
-      scrollListener = null;
-    }
+.perf-panel_button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:6px 10px;
+  border-radius:8px;
+  border:none;
+  background:var(--accent);
+  color:#020617;
+  font-size:12px;
+  cursor:pointer;
+  margin-bottom:6px;
+}
 
+.perf-panel_result{
+  font-size:12px;
+  color:var(--muted);
+  word-break:break-word;
+}
 
-    if (statsIntervalId) {
-      clearInterval(statsIntervalId);
-      statsIntervalId = null;
-    }
+.perf-panel_label{
+  display:block;
+  font-size:12px;
+  margin-bottom:6px;
+}
 
-    scrollRawCount = 0;
-    scrollHandledCount = 0;
+.perf-panel_select{
+  width:100%;
+  margin-top:4px;
+  padding:6px 8px;
+  border-radius:6px;
+  border:1px solid rgba(148,163,184,0.35);
+  background:rgba(15,23,42,0.9);
+  color:var(--text);
+}
 
-    let handlerImpl = baseScrollHandler;
+.paint-test{
+  background:linear-gradient(135deg, rgba(96,165,250,0.18), rgba(56,189,248,0.06)) !important;
+  outline:1px solid rgba(96, 224, 250, 0.596);
+}
 
-    if (mode === 'off') {
-      handlerImpl = baseScrollHandler;
-    } else if (mode === 'throttle-60') {
-      handlerImpl = throttle(baseScrollHandler, 60);
-    } else if (mode === 'throttle-120') {
-      handlerImpl = throttle(baseScrollHandler, 120);
-    } else if (mode === 'debounce-120') {
-      handlerImpl = debounce(baseScrollHandler, 120);
-    }
-
-    scrollListener = function (e) {
-      scrollRawCount++;
-      handlerImpl(e);
-    };
-
-    testContentWrapper.addEventListener('scroll', scrollListener);
-
-    statsIntervalId = setInterval(() => {
-      if (!scrollModeStats) return;
-      scrollModeStats.textContent =
-        `${scrollHandledCount} handler calls / ${scrollRawCount} scroll events (last ~5s).`;
-      scrollRawCount = 0;
-      scrollHandledCount = 0;
-    }, 5000);
-  }
-
-  if (scrollModeSelect && scrollModeStats) {
-    applyScrollMode(scrollModeSelect.value);
-
-    scrollModeSelect.addEventListener('change', (e) => {
-      const mode = e.target.value;
-      applyScrollMode(mode);
-    });
-  }
 
