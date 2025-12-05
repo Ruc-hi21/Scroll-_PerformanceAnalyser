@@ -66,9 +66,7 @@ const perfDebugButton  = document.getElementById('perfDebugButton');
       'OK';
 
     reflowOutput.textContent =
-      `${total.toFixed(2)}ms total, ` +
-      `${perTile.toFixed(3)}ms/tile → ${severity}. ` +
-      `(sum height: ${totalHeight})`;
+      `${total.toFixed(2)}ms total, ` + `${perTile.toFixed(3)}ms/tile → ${severity}. ` + `(sum height: ${totalHeight})`;
   }
 
   if (runReflowBtn && reflowOutput) {
@@ -216,3 +214,4 @@ const perfDebugButton  = document.getElementById('perfDebugButton');
       applyScrollMode(mode);
     });
   }
+
