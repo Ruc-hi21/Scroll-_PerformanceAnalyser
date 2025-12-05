@@ -1,78 +1,77 @@
-(() =>{
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const exportBtn = document.getElementById('exportBtn');
-    const currentFpsE1 = document.getElementById('currentFps');
-    const avgFpsE1 = document.getElementById('avgFps');
-    const droppedFramesE1 = document.getElementById('droppedFrames');
-    const layoutShiftE1 = document.getElementById('layoutShift');
-    const longTaskCountE1 = document.getElementById('longTaskCount');
-    const reportArea = document.getElemnetById('reportArea');
-    const fpsThresholdInput = document.getElementById('fpsThreshold');
-    const testContentWrapper = document.getElementById('testContent');
-    const testContent = document.querySelector('.big-grid');
-    const testTargetSelect = document.getElementById('testTarget');
+(() => {
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const currentFpsEl = document.getElementById('currentFps');
+  const avgFpsEl = document.getElementById('avgFps');
+  const droppedFramesEl = document.getElementById('droppedFrames');
+  const layoutShiftEl = document.getElementById('layoutShift');
+  const longTaskCountEl = document.getElementById('longTaskCount');
+  const reportArea = document.getElementById('reportArea');
+  const fpsThresholdInput = document.getElementById('fpsThreshold');
 
-})
+  const testContent = document.querySelector('.big-grid');
 
   function populateTiles(n = 60) {
     testContent.innerHTML = '';
     for (let i = 1; i <= n; i++) {
       const tile = document.createElement('div');
       tile.className = 'tile';
-      tile.innerHTML = `<h3>Item ${i}</h3><div>Some text content to make this box a little heavier.</div>`;
+      tile.innerHTML = `<h3>Tile ${i}</h3><div>Some text content to make this box a little heavier.</div>`;
       testContent.appendChild(tile);
     }
   }
   populateTiles(80);
 
-const ctx = document.getElementById('fpsChart').getContext('2d');
-const chartData = {
+  // Chart.js setup
+  const ctx = document.getElementById('fpsChart').getContext('2d');
+  const chartData = {
     labels: [],
     datasets: [{
-        label: 'FPS Over Time',
-        data: [],
-        tension: 0.2,
-        fill: false,
-        pointRadius: 0,
-        borderWidth: 2,
+      label: 'FPS',
+      data: [],
+      tension: 0.2,
+      fill: false,
+      pointRadius: 0,
+      borderWidth: 2,
     }]
-  };       
-const fpsChart = new Chart(ctx, {
+  };
+  const fpsChart = new Chart(ctx, {
     type: 'line',
     data: chartData,
-    options :{
-      animation:false,
+    options: {
+      animation: false,
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-        y: { min: 0, max: 60, ticks: { stepSize: 5 } }
+        y: { min: 0, max: 60, ticks: { stepSize: 10 } }
       },
       plugins: { legend: { display: false } }
     }
   });
 
-let running = false;
-let rafId = null;
-let lastFrameTs = performance.now();
-let frameCount = 0;
-let fpsSamples = [];
-let droppedFrames = 0;
-let layoutShiftScore = 0;
-let longTaskCount = 0;
-let capturedEntries = {
+  let running = false;
+  let rafId = null;
+  let lastFrameTs = performance.now();
+  let frameCount = 0;
+  let fpsSamples = [];
+  let droppedFrames = 0;
+  let layoutShiftScore = 0;
+  let longTaskCount = 0;
+  let capturedEntries = {
     frames: [],
     layoutShifts: [],
     longTasks: []
   };
 
-function measureFrame(ts){
+  function measureFrame(ts) {
     if (!running) return;
     frameCount++;
     const delta = ts - lastFrameTs;
 
     if (delta >= 1000) {
       const fps = Math.round((frameCount * 1000) / delta);
+      // estimate dropped frames roughly: ideal = 60fps → framesExpected = delta/16.666
       const expectedFrames = Math.round(delta / (1000 / 60));
       const dropped = Math.max(0, expectedFrames - frameCount);
       droppedFrames += dropped;
@@ -86,10 +85,12 @@ function measureFrame(ts){
       frameCount = 0;
       lastFrameTs = ts;
     }
+
     rafId = requestAnimationFrame(measureFrame);
-}
-function updateMetricsUI(currentFps){
-    currentFpsE1.textContent = currentFps;
+  }
+
+  function updateMetricsUI(currentFps) {
+    currentFpsEl.textContent = currentFps;
     const avg = Math.round((fpsSamples.reduce((s, x) => s + x.fps, 0) / Math.max(1, fpsSamples.length)) * 10) / 10;
     avgFpsEl.textContent = (avg || '—');
     droppedFramesEl.textContent = droppedFrames;
@@ -97,38 +98,41 @@ function updateMetricsUI(currentFps){
     longTaskCountEl.textContent = longTaskCount;
   }
 
-function pushToChart(fps){
-    const label = new Data().toLocaleTimeString();
+  function pushToChart(fps) {
+    const label = new Date().toLocaleTimeString();
     chartData.labels.push(label);
     chartData.datasets[0].data.push(fps);
-    if (chartData.labels.length > 60){
-        chartData.labels.shift();
-        chartData.datasets[0].data.shift();
-}
+    // keep last 60 points
+    if (chartData.labels.length > 60) {
+      chartData.labels.shift();
+      chartData.datasets[0].data.shift();
+    }
     fpsChart.update('none');
-}
+  }
 
-let layoutObserver = null;
-let longTaskObserver = null;
+  let layoutObserver = null;
+  let longTaskObserver = null;
 
-function setupObservers(){
-    try{
-        layoutObserver = new PerformanceObserver((list) => {
-            const entries = list.getEntries();
-            for (const e of entries){
-                layoutShiftScore += e.value || 0;
-                capturedEntries.layoutShifts.push({
-                    ts: Date.now(),
-                    value: e.value,
-                    sources: (e.sources || []).map(s => s.node ? (s.node.tagName || 'NODE'):(s.type || 'source'))
-                });
-    }
-});
-        layoutObserver.observe({ type: 'layout-shift', buffered: true });
+  function setupObservers() {
+    try {
+      layoutObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        for (const e of entries) {
+          // only count layout shifts without user input pause (the spec)
+          layoutShiftScore += e.value || 0;
+          capturedEntries.layoutShifts.push({
+            ts: Date.now(),
+            value: e.value,
+            sources: (e.sources || []).map(s => s.node ? (s.node.tagName || 'NODE') : (s.type || 'source'))
+          });
+        }
+      });
+      layoutObserver.observe({ type: 'layout-shift', buffered: true });
     } catch (err) {
-        console.warn('Layout Shift observation not supported:', err);
+      console.warn('Layout Shift observer not supported:', err);
     }
 
+    // Long tasks
     try {
       longTaskObserver = new PerformanceObserver((list) => {
         for (const e of list.getEntries()) {
@@ -152,10 +156,11 @@ function setupObservers(){
     try { longTaskObserver && longTaskObserver.disconnect(); } catch(e){}
   }
 
+  // Start test
   function startTest() {
     if (running) return;
     running = true;
-
+    // reset data
     fpsSamples = [];
     capturedEntries = { frames: [], layoutShifts: [], longTasks: [] };
     frameCount = 0;
@@ -166,8 +171,10 @@ function setupObservers(){
     chartData.datasets[0].data = [];
     fpsChart.update();
 
+    // Setup observers
     setupObservers();
 
+    // Start measuring
     lastFrameTs = performance.now();
     rafId = requestAnimationFrame(measureFrame);
 
@@ -177,12 +184,14 @@ function setupObservers(){
     reportArea.textContent = 'Running... Scroll inside the test area to exercise the page.';
   }
 
+  // Stop test
   function stopTest() {
     if (!running) return;
     running = false;
     if (rafId) cancelAnimationFrame(rafId);
     disconnectObservers();
 
+    // compose report
     const avg = Math.round((fpsSamples.reduce((s, x) => s + x.fps, 0) / Math.max(1, fpsSamples.length)) * 10) / 10;
     const worst = fpsSamples.length ? Math.min(...fpsSamples.map(s=>s.fps)) : null;
     const droppedTotal = droppedFrames;
@@ -241,6 +250,7 @@ function setupObservers(){
     return out;
   }
 
+  // Export JSON
   function exportJSON() {
     const payload = {
       captured: capturedEntries,
@@ -260,7 +270,10 @@ function setupObservers(){
     a.remove();
     URL.revokeObjectURL(url);
   }
+
+  // Event bindings
   startBtn.addEventListener('click', () => {
+    // If testing external URL in iframe, focus must be inside the iframe to scroll it.
     startTest();
   });
   stopBtn.addEventListener('click', stopTest);
@@ -272,11 +285,10 @@ function setupObservers(){
     console.warn('PerformanceObserver not supported in this browser. Some metrics will be unavailable.');
   }
 
-  // "s" key convenience for start/stop
   window.addEventListener('keydown', (e) => {
     if (e.key === 's') {
       if (running) stopTest(); else startTest();
     }
-    }
-);
+  });
 
+})();
