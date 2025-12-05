@@ -209,7 +209,7 @@ footer{
   pointer-events:auto;
 }
 
-.perf-panel__header{
+.perf-panel_header{
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -218,18 +218,18 @@ footer{
   padding-bottom:8px;
 }
 
-.perf-panel__header h2{
+.perf-panel_header h2{
   margin:0;
   font-size:17px;
 }
 
-.perf-panel__subtitle{
+.perf-panel_subtitle{
   margin:0;
   font-size:11px;
   color:var(--muted);
 }
 
-.perf-panel__close{
+.perf-panel_close{
   border:none;
   background:transparent;
   color:var(--muted);
@@ -238,28 +238,28 @@ footer{
   line-height:1;
 }
 
-.perf-panel__section{
+.perf-panel_section{
   padding:10px 0;
   border-bottom:1px solid rgba(148,163,184,0.16);
   font-size:13px;
 }
 
-.perf-panel__section:last-of-type{
+.perf-panel_section:last-of-type{
   border-bottom:none;
 }
 
-.perf-panel__section h3{
+.perf-panel_section h3{
   margin:0 0 6px;
   font-size:14px;
 }
 
-.perf-panel__help{
+.perf-panel_help{
   margin:0 0 8px;
   color:var(--muted);
   font-size:12px;
 }
 
-.perf-panel__button{
+.perf-panel_button{
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -273,19 +273,19 @@ footer{
   margin-bottom:6px;
 }
 
-.perf-panel__result{
+.perf-panel_result{
   font-size:12px;
   color:var(--muted);
   word-break:break-word;
 }
 
-.perf-panel__label{
+.perf-panel_label{
   display:block;
   font-size:12px;
   margin-bottom:6px;
 }
 
-.perf-panel__select{
+.perf-panel_select{
   width:100%;
   margin-top:4px;
   padding:6px 8px;
@@ -299,3 +299,4 @@ footer{
   background:linear-gradient(135deg, rgba(96,165,250,0.18), rgba(56,189,248,0.06)) !important;
   outline:1px solid rgba(96,165,250,0.5);
 }
+
