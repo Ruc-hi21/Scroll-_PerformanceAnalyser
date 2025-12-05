@@ -15,16 +15,16 @@
 
 })
 
-function populateTiles(n=60){
-    if (!testContent) return;
-    testContemt.innerHTML = '';
-    for(let i=1; i<=n; i++){
-        const tile = document.createElement('div');
-        tile.className = 'tile';
-        tile.innerHTML = `<h3> Tile ${i} </h3><div>Content for Test because it is there. ${i}</div>`
-        testContent.appendChild(tile);
+  function populateTiles(n = 60) {
+    testContent.innerHTML = '';
+    for (let i = 1; i <= n; i++) {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.innerHTML = `<h3>Item ${i}</h3><div>Some text content to make this box a little heavier.</div>`;
+      testContent.appendChild(tile);
     }
-}
+  }
+  populateTiles(80);
 
 const ctx = document.getElementById('fpsChart').getContext('2d');
 const chartData = {
@@ -279,3 +279,4 @@ function setupObservers(){
     }
     }
 );
+
