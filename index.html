@@ -1,116 +1,109 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scroll Performance Analyzer</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scroll Performance Analyzer</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-    <header>
-        <h1  style="font-size: 48px;">Scroll Performace Analyzer</h1>
-        <p class="muted">Measure FPS, layout shifts and long JS tasks while</p>
-    </header>
+<header>
+  <h1>Scroll Performance Analyzer</h1>
+  <p class="muted">Measure FPS, layout shifts and long JS tasks while you scroll.</p>
+</header>
 
-    <main>
-        <section class="constrols card">
-            <label for="testTarget">Test target:</label>
-            <select id="testTarget">
-                <option value="local">Use local test page(below)</option>
-            </select>
+<main>
+  <section class="controls card">
+    <label for="testTarget">Test target:</label>
+    <select id="testTarget">
+    <option value="local">Use local test page (below)</option>
+    </select>
 
-        <div class="buttons">
-            <button id="startBtn">Start Test</button>
-            <button id="stopBtn" disabled>Stop Test</button>
-            <button id="exportBtn" disabled>Export JSON</button>
-        </div>
+  <div class="buttons">
+    <button id="startBtn">Start Test</button>
+    <button id="stopBtn" disabled>Stop Test</button>
+    <button id="exportBtn" disabled>Export JSON</button>
+  </div>
 
-        <div id="thresholdRow">
-            <label>FPS threshold:
-            <input type="number" id="fpsThreshold" value="45" min="1" max="60" />                
-            </label>
-        </DIV>
-        </section>
+    <div id="thresholdRow">
+    <label>FPS threshold:
+    <input type="number" id="fpsThreshold" value="45" min="1" max="60" />
+    </label>
+    </div>
+  </section>
 
-        <section  class="visuals card">
-            <h2>Live Metrics</h2>
-            <div class="charts">
-                <canvas id="fpsChart" height="120"></canvas>
-            </div>
+  <section class="visuals card">
+    <h2>Live Metrics</h2>
+    <div class="charts">
+      <canvas id="fpsChart" height="120"></canvas>
+    </div>
 
-            <div class="metrics">
-            <div><strong>Current FPS:</strong> <span id="currentFps">—</span></div>
-            <div><strong>Average FPS:</strong> <span id="avgFps">—</span></div>
-            <div><strong>Dropped Frames:</strong> <span id="droppedFrames">—</span></div>
-            <div><strong>Layout Shift Score:</strong> <span id="layoutShift">—</span></div>
-            <div><strong>Long Tasks (count):</strong> <span id="longTaskCount">—</span></div>
-            </div>
-        </section>
+    <div class="metrics">
+      <div><strong>Current FPS:</strong> <span id="currentFps">—</span></div>
+      <div><strong>Average FPS:</strong> <span id="avgFps">—</span></div>
+      <div><strong>Dropped Frames:</strong> <span id="droppedFrames">—</span></div>
+      <div><strong>Layout Shift Score:</strong> <span id="layoutShift">—</span></div>
+      <div><strong>Long Tasks (count):</strong> <span id="longTaskCount">—</span></div>
+    </div>
+  </section>
 
-        <section class="report card">
-            <h2>Report</h2>
-            <pre id="reportArea">No report yet.</pre>
-        </section>
+  <section class="report card">
+    <h2>Summary Report</h2>
+    <pre id="reportArea">No report yet.</pre>
+  </section>
 
-        <section>
-            <h2>Local Scroll Test Content</h2>
-            <p>Scroll within this content area to test performance. The analyzer will measure FPS, layout shifts, and long tasks during scrolling.</p>
-            
-            <div id="testContent" class="testcontent">
-                <div class="big-grid"></div>
-            </div>
+  <section class="test-area card">
+    <h2>Local Scroll Test Content</h2>
+    <p>Use this content to scroll for local testing.</p>
 
-        </section>
-    </main>
+    <div id="testContent" class="testcontent">
+      <!-- Long content to scroll -->
+    <div class="big-grid">
+      <!-- generate many tiles -->
+      <!-- We fill with JS on load for easier editing -->
+    </div>
+    </div>
+  </section>
+</main>
 
-<button id="perfDebugButton" class="perf-debug-button" title="Toggle Performance Panel">
-    ⚙️
-  </button>
+<button id="perfDebugButton" class="perf-debug-button" title="Toggle Performance Panel">⚙️</button>
 
   <!-- Performance Side Panel -->
   <aside id="perfPanel" class="perf-panel perf-panel--hidden" aria-hidden="true">
-    <header class="perf-panel__header">
+    <header class="perf-panel_header">
       <div>
         <h2>Performance Panel</h2>
-        <p class="perf-panel__subtitle">toggle</p>
+        <p class="perf-panel_subtitle">toggle</p>
       </div>
-      <button id="perfPanelClose" class="perf-panel__close" aria-label="Close panel">×</button>
+      <button id="perfPanelClose" class="perf-panel_close" aria-label="Close panel">☒</button>
     </header>
 
-    <section class="perf-panel__section">
+    <section class="perf-panel_section">
       <h3>Forced Reflow Detector</h3>
-      <p class="perf-panel__help">
-        Runs a synthetic layout-read pass over the local test tiles using
-        <code>performance.now()</code>. Higher times imply heavier layout work.
-      </p>
-      <button id="runReflowBtn" class="perf-panel__button">Run Reflow Scan</button>
-      <div class="perf-panel__result">
+      <p class="perf-panel_help">Runs a synthetic layout-read pass over the local test tiles using<code>performance.now()</code>. Higher times imply heavier layout work.</p>
+      <button id="runReflowBtn" class="perf-panel_button">Run Reflow Scan</button>
+      <div class="perf-panel_result">
         Last scan: <span id="reflowOutput">No scan yet.</span>
       </div>
     </section>
 
-    <section class="perf-panel__section">
+    <section class="perf-panel_section">
       <h3>Paint Cost Estimator</h3>
-      <p class="perf-panel__help">
-        Toggles a visual class on all tiles and measures estimated layout/paint cost.
-      </p>
-      <button id="runPaintBtn" class="perf-panel__button">Estimate Paint Cost</button>
-      <div class="perf-panel__result">
+      <p class="perf-panel_help">Toggles a visual class on all tiles and measures estimated layout/paint cost.</p>
+      <button id="runPaintBtn" class="perf-panel_button">Estimate Paint Cost</button>
+      <div class="perf-panel_result">
         Last estimate: <span id="paintOutput">No estimate yet.</span>
       </div>
     </section>
 
-    <section class="perf-panel__section">
+    <section class="perf-panel_section">
       <h3>What-If Throttle/Debounce Modes</h3>
-      <p class="perf-panel__help">
-        Applies different scroll handler strategies to the local test area so you
-        can see how often the handler really runs.
-      </p>
-
-      <label class="perf-panel__label">
+      <p class="perf-panel_help">Applies different scroll handler strategies to the local test area so you can see how often the handler really runs.</p>
+      <label class="perf-panel_label">
         Mode:
-        <select id="scrollModeSelect" class="perf-panel__select">
+        <select id="scrollModeSelect" class="perf-panel_select">
           <option value="off">None (raw scroll)</option>
           <option value="throttle-60">Throttle 60ms</option>
           <option value="throttle-120">Throttle 120ms</option>
@@ -118,17 +111,18 @@
         </select>
       </label>
 
-      <div class="perf-panel__result">
-        Handler activity (last 5s window):<br />
-        <span id="scrollModeStats">No data yet.</span>
+      <div class="perf-panel_result">
+        Handler activity (last 5s window):<br /><span id="scrollModeStats">No data yet.</span>
       </div>
     </section>
   </aside>
 
-    <footer>
-        <small>Built with PerformanceObserver, requestAnimation & Chart.js</small>
-    </footer>
-    <script src="script.js"></script>
-    <script src="panel.js"></script>
+  <footer>
+    <small>Built with PerformanceObserver, requestAnimation & Chart.js</small>
+  </footer>
+
+<script src="script.js"></script>
+<script src="panel.js"></script>
 </body>
 </html>
+
