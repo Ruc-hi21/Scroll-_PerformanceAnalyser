@@ -1,3 +1,6 @@
+//globally accessible so panel.js can use it
+  window.testContent = document.querySelector('.big-grid');
+  window.testContentWrapper = document.getElementById('testContent');
 (() => {
   const startBtn = document.getElementById('startBtn');
   const stopBtn = document.getElementById('stopBtn');
@@ -9,8 +12,6 @@
   const longTaskCountEl = document.getElementById('longTaskCount');
   const reportArea = document.getElementById('reportArea');
   const fpsThresholdInput = document.getElementById('fpsThreshold');
-
-  const testContent = document.querySelector('.big-grid');
 
   function populateTiles(n = 60) {
     testContent.innerHTML = '';
@@ -292,3 +293,4 @@
   });
 
 })();
+
