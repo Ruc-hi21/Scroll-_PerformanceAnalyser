@@ -211,7 +211,6 @@
       longTaskCount: longTasks,
       suggestions
     };
-
     reportArea.textContent = JSON.stringify(report, null, 2);
     exportBtn.disabled = false;
     startBtn.disabled = false;
@@ -274,7 +273,6 @@
 
   // Event bindings
   startBtn.addEventListener('click', () => {
-    // If testing external URL in iframe, focus must be inside the iframe to scroll it.
     startTest();
   });
   stopBtn.addEventListener('click', stopTest);
@@ -293,4 +291,5 @@
   });
 
 })();
+
 
